@@ -37,6 +37,7 @@ public class MembershipController {
         return new MembershipDTO(m.getId(), m.getName(), m.getPhoto(), m.getBankAccount(), m.getDebt());
     }
 
+    // This is used to add the first member when creating a group - it is the user themselves + connecting to the account
     @PostMapping("/{groupCode}/{createBy}")
     public ResponseEntity createInGroup (@PathVariable String groupCode, @PathVariable Integer createBy, @RequestBody MembershipDTO dto) {
         // always new
@@ -59,6 +60,7 @@ public class MembershipController {
         }
     }
 
+    // This is used to add other members
     @PostMapping("/{groupCode}")
     public ResponseEntity createInGroup (@PathVariable String groupCode, @RequestBody MembershipDTO dto) {
         // always new

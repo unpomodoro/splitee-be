@@ -54,18 +54,20 @@ public class Membership {
         BigDecimal owes = BigDecimal.ZERO;
         BigDecimal getsBack = BigDecimal.ZERO;
 
-        for (Debt d : debtsOwes) {
-            if (d.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-                owes = owes.add(d.getAmount());
-            } else {
-                getsBack = getsBack.add(d.getAmount().negate());
+        if(debtsOwes != null && debtsGetsBack != null) {
+            for (Debt d : debtsOwes) {
+                if (d.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    owes = owes.add(d.getAmount());
+                } else {
+                    getsBack = getsBack.add(d.getAmount().negate());
+                }
             }
-        }
-        for (Debt d : debtsGetsBack) {
-            if (d.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-                getsBack = getsBack.add(d.getAmount());
-            } else {
-                owes = owes.add(d.getAmount().negate());
+            for (Debt d : debtsGetsBack) {
+                if (d.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    getsBack = getsBack.add(d.getAmount());
+                } else {
+                    owes = owes.add(d.getAmount().negate());
+                }
             }
         }
 
