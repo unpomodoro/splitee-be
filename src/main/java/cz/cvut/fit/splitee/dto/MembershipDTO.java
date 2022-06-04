@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter @Setter
 @AllArgsConstructor
 public class MembershipDTO {
@@ -12,4 +14,5 @@ public class MembershipDTO {
     private String name;
     private String photo;
     private String bankAccount;
+    private BigDecimal debt;
 }

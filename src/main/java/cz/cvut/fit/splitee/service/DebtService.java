@@ -42,7 +42,7 @@ public class DebtService {
         Optional<Membership> optGetsBack = membershipRepository.findById(id.getGetsBackId());
 
         if(optOwes.isEmpty() || optGetsBack.isEmpty()) return;
-        optOwes.get().getDebtsGetBack().remove(optional.get());
+        optOwes.get().getDebtsGetsBack().remove(optional.get());
         optGetsBack.get().getDebtsOwes().remove(optional.get());
     }
 }

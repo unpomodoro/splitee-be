@@ -13,6 +13,6 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
     @Query(value = "SELECT m.debtsOwes from membership m where m.id = :id")
     Collection<Debt> findAllDebtsOwesById(Long id);
 
-    @Query(value = "SELECT m.debtsGetBack from membership m where m.id = :id")
+    @Query(value = "SELECT m.debtsGetsBack from membership m where m.id = :id")
     Collection<Debt> findAllDebtsGetsBackById(Long id);
 }

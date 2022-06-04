@@ -19,9 +19,16 @@ public class MembershipService {
 
     // All debt-relations. should be (n - 1) where n is number of members in a group
     public Collection<Debt> findAllDebtsById(Integer id) {
-        Collection<Debt> debt = membershipRepository.findAllDebtsOwesById(id.longValue());
-        debt.addAll(membershipRepository.findAllDebtsGetsBackById(id.longValue()));
-        return debt;
+        // All records where 'id' is on the 'owes' side
+        Collection<Debt> debts = membershipRepository.findAllDebtsOwesById(id.longValue());
+
+        // All records where 'id' is on the 'getsBack' side --> need to change the amount
+        Collection<Debt> getsBack = membershipRepository.findAllDebtsGetsBackById(id.longValue());
+        for (Debt d : getsBack) {
+            Debt tmp = new Debt(d.getGetsBack(), d.getOwes(), d.getAmount().negate());
+            debts.add(tmp);
+        }
+        return debts;
     }
 
     @Transactional

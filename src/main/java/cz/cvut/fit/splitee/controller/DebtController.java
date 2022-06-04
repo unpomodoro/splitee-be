@@ -21,7 +21,9 @@ public class DebtController {
     @Autowired
     private MembershipService membershipService;
 
-    public static DebtDTO entityToDto(Debt d) { return new DebtDTO(d.getId().getOwesId(), d.getId().getGetsBackId(), d.getAmount()); }
+    public static DebtDTO entityToDto(Membership owes, Membership getsBack, BigDecimal amount) {
+        return new DebtDTO(MembershipController.entityToDto(owes), MembershipController.entityToDto(getsBack), amount);
+    }
 
     @PostMapping("/{owes}/{getsBack}")        // Debt is created at the same time as member
     public ResponseEntity create (@PathVariable Integer owes, @PathVariable Integer getsBack, @RequestBody DebtDTO dto) {
@@ -30,7 +32,7 @@ public class DebtController {
         if (optOwes.isPresent() && optGetsBack.isPresent()) {
             Debt debt = new Debt(optOwes.get(), optGetsBack.get(), dto.getAmount());
             debt.setId(new DebtPK(owes.longValue(), getsBack.longValue()));
-            DebtDTO newDto = entityToDto(debtService.createOrUpdate(debt));
+            DebtDTO newDto = entityToDto(optOwes.get(), optGetsBack.get() ,debtService.createOrUpdate(debt).getAmount());
             return ResponseEntity.created(null).body(newDto);
         }
         else {
@@ -45,7 +47,8 @@ public class DebtController {
     public ResponseEntity findById (@PathVariable Integer owes, @PathVariable Integer getsBack) {
         Optional<Debt> optional = debtService.findById(owes, getsBack);
         if (optional.isPresent()) { //
-            DebtDTO dto = entityToDto(optional.get());
+            Debt debt = optional.get();
+            DebtDTO dto = entityToDto(debt.getOwes(), debt.getGetsBack(), debt.getAmount());
             return ResponseEntity.ok(dto);
         }
         else {
@@ -68,7 +71,8 @@ public class DebtController {
                 BigDecimal newAmount = debt.getAmount().subtract(amountModif);
                 debt.setAmount(newAmount);
             }
-            DebtDTO newDto = entityToDto(debtService.createOrUpdate(debt));
+            debtService.createOrUpdate(debt);
+            DebtDTO newDto = entityToDto(debt.getOwes(), debt.getGetsBack(), debt.getAmount());
             return ResponseEntity.ok(newDto);
         }
         return ResponseEntity.badRequest().body("This debt does not exist.");

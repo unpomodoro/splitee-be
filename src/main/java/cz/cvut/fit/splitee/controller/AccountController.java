@@ -73,6 +73,7 @@ public class AccountController {
         }
     }
 
+    @CrossOrigin
     @GetMapping("/{id}/groups")
     public Collection<GroupDTO> listAllGroups(@PathVariable("id") Integer id) {
         Collection<Group> groupsEntity = accountService.findAllGroupsById(id);

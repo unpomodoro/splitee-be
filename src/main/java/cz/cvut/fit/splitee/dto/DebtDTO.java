@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DebtDTO {
 
-    private Long owes;
-    private Long getsBack;
+    private MembershipDTO owes;
+    private MembershipDTO getsBack;
     private BigDecimal amount;
 }

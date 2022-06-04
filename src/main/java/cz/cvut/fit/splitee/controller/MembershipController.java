@@ -32,8 +32,9 @@ public class MembershipController {
         return new Membership(m.getName(), m.getPhoto(), m.getBankAccount());
     }
 
+    //TODO pass in the user's account id
     static MembershipDTO entityToDto(Membership m) {
-        return new MembershipDTO(m.getId(), m.getName(), m.getPhoto(), m.getBankAccount());
+        return new MembershipDTO(m.getId(), m.getName(), m.getPhoto(), m.getBankAccount(), m.getDebt());
     }
 
     @PostMapping("/{groupId}/{createBy}")
@@ -135,10 +136,12 @@ public class MembershipController {
 
     @GetMapping("/{id}/debts")      // returns all debt-relation to all members in group
     public Collection<DebtDTO> listAllDebts(@PathVariable Integer id) {
+        // All these debts has 'id' as 'owes' side
+        // Need member's info
         Collection<Debt> entityList = membershipService.findAllDebtsById(id);
         Collection<DebtDTO> dtoList = new ArrayList<>();
         for (Debt debt : entityList) {
-            DebtDTO dto = DebtController.entityToDto(debt);
+            DebtDTO dto = DebtController.entityToDto(debt.getOwes(), debt.getGetsBack(), debt.getAmount());
             dtoList.add(dto);
         }
         return dtoList;
