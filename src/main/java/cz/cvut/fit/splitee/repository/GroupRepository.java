@@ -15,11 +15,11 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     Optional<Group> findByCode(String code);
 
-    @Query(value = "SELECT g.memberships from group g where g.id = :id")
-    Collection<Membership> findAllMembersById(Long id);
+    @Query(value = "SELECT g.memberships from group g where g.code = :code")
+    Collection<Membership> findAllMembersByCode(String code);
 
     //Collection<Membership> findAllMembersWithoutAccount(Long id);
 
-    @Query(value = "SELECT g.bills from group g where g.id = :id")
-    Collection<Bill> findAllBillsById(Long id);
+    @Query(value = "SELECT g.bills from group g where g.code = :code")
+    Collection<Bill> findAllBillsByCode(String code);
 }

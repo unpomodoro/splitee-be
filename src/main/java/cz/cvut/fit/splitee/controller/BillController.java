@@ -33,10 +33,10 @@ public class BillController {
         return new BillDTO(b.getDescription(), b.getAmount(), b.getDate(), b.getNotes());
     }
 
-    @PostMapping("/{groupId}")
-    public ResponseEntity create (@PathVariable Integer groupId, @RequestBody BillDTO dto) {
+    @PostMapping("/{groupCode}")
+    public ResponseEntity create (@PathVariable String groupCode, @RequestBody BillDTO dto) {
         // always new
-        Optional<Group> optional = groupService.findById(groupId);
+        Optional<Group> optional = groupService.findByCode(groupCode);
         if (optional.isPresent()) {
 
             Timestamp date = new Timestamp(new Date().getTime());

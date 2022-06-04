@@ -20,25 +20,25 @@ public class GroupService {
     public Group createOrUpdate(Group group) { return groupRepository.save(group); }
     public Optional<Group> findByCode(String code) { return groupRepository.findByCode(code); }
 
-    public Optional<Group> findById(Integer id) {
-        return groupRepository.findById(id.longValue());
+    public Optional<Group> findById(String code) {
+        return groupRepository.findByCode(code);
     }
 
-    public Collection<Membership> findAllMembersById(Integer id) { return groupRepository.findAllMembersById(id.longValue()); }
+    public Collection<Membership> findAllMembersByCode(String code) { return groupRepository.findAllMembersByCode(code); }
 
-    public Collection<Membership> findAllMembersWithoutAccount(Integer id) {
-        Collection<Membership> memberships = groupRepository.findAllMembersById(id.longValue());
+    public Collection<Membership> findAllMembersWithoutAccount(String code) {
+        Collection<Membership> memberships = groupRepository.findAllMembersByCode(code);
         memberships.removeIf(m -> m.getAccount() != null);
         return memberships;
     }
 
     @Transactional
-    public void deleteById(Integer id) {
-        Optional<Group> optional = groupRepository.findById(id.longValue());
+    public void deleteByCode(String code) {
+        Optional<Group> optional = groupRepository.findByCode(code);
         if(optional.isEmpty()) return;
         // members and bills has cascade --> no need to care
-        groupRepository.deleteById(id.longValue());
+        groupRepository.deleteById(optional.get().getId());
     }
 
-    public Collection<Bill> findAllBillsById(Integer id) { return groupRepository.findAllBillsById(id.longValue()); }
+    public Collection<Bill> findAllBillsByCode(String code) { return groupRepository.findAllBillsByCode(code); }
 }

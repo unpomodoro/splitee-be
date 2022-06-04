@@ -56,19 +56,7 @@ public class GroupController {
         return ResponseEntity.created(null).body(dto);
     }
 
-    @GetMapping("/id/{id}")
-    public ResponseEntity findById (@PathVariable Integer id) {
-        Optional<Group> optional = groupService.findById(id);
-        if (optional.isPresent()) {
-            GroupDTO dto = entityToDto(optional.get());
-            return ResponseEntity.ok(dto);
-        }
-        else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @GetMapping("/code/{code}")
+    @GetMapping("/{code}")
     public ResponseEntity findByCode (@PathVariable String code) {
         Optional<Group> optional = groupService.findByCode(code);
         if (optional.isPresent()) {
@@ -80,9 +68,9 @@ public class GroupController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable Integer id, @RequestBody GroupDTO dto) {
-        Optional<Group> optional = groupService.findById(id);
+    @PutMapping("/{code}")
+    public ResponseEntity update(@PathVariable String code, @RequestBody GroupDTO dto) {
+        Optional<Group> optional = groupService.findByCode(code);
         if (optional.isPresent()) {
             Group group = optional.get();
             // DTO has all old and new fields
@@ -96,19 +84,19 @@ public class GroupController {
         return ResponseEntity.badRequest().body("This group does not exist.");
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable Integer id) {
+    @DeleteMapping("/{code}")
+    public ResponseEntity delete(@PathVariable String code) {
         try {
-            groupService.deleteById(id);
+            groupService.deleteByCode(code);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @GetMapping("/{id}/members")
-    public Collection<MembershipDTO> listAllMembers(@PathVariable Integer id) {
-        Collection<Membership> entityList = groupService.findAllMembersById(id);
+    @GetMapping("/{code}/members")
+    public Collection<MembershipDTO> listAllMembers(@PathVariable String code) {
+        Collection<Membership> entityList = groupService.findAllMembersByCode(code);
         Collection<MembershipDTO> dtoList = new ArrayList<>();
         for (Membership member : entityList) {
             MembershipDTO dto = MembershipController.entityToDto(member);
@@ -117,9 +105,9 @@ public class GroupController {
         return dtoList;
     }
 
-    @GetMapping("/{id}/members/noacc")
-    public Collection<MembershipDTO> listAllMembersWithoutAccount(@PathVariable Integer id) {
-        Collection<Membership> entityList = groupService.findAllMembersWithoutAccount(id);
+    @GetMapping("/{code}/members/noacc")
+    public Collection<MembershipDTO> listAllMembersWithoutAccount(@PathVariable String code) {
+        Collection<Membership> entityList = groupService.findAllMembersWithoutAccount(code);
         Collection<MembershipDTO> dtoList = new ArrayList<>();
         for (Membership member : entityList) {
             MembershipDTO dto = MembershipController.entityToDto(member);
@@ -131,8 +119,8 @@ public class GroupController {
     // editMember() -> if(hasAccount()) can't edit | else ok --> In MembershipController
     // deleteMember() --> In MembershipController
     @GetMapping("/{id}/bills")
-    public Collection<BillDTO> listAllBills(@PathVariable Integer id) {
-        Collection<Bill> entityList = groupService.findAllBillsById(id);
+    public Collection<BillDTO> listAllBills(@PathVariable String code) {
+        Collection<Bill> entityList = groupService.findAllBillsByCode(code);
         Collection<BillDTO> dtoList = new ArrayList<>();
         for (Bill bill : entityList) {
             BillDTO dto = BillController.entityToDto(bill);

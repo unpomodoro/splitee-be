@@ -37,10 +37,10 @@ public class MembershipController {
         return new MembershipDTO(m.getId(), m.getName(), m.getPhoto(), m.getBankAccount(), m.getDebt());
     }
 
-    @PostMapping("/{groupId}/{createBy}")
-    public ResponseEntity createInGroup (@PathVariable Integer groupId, @PathVariable Integer createBy, @RequestBody MembershipDTO dto) {
+    @PostMapping("/{groupCode}/{createBy}")
+    public ResponseEntity createInGroup (@PathVariable String groupCode, @PathVariable Integer createBy, @RequestBody MembershipDTO dto) {
         // always new
-        Optional<Group> optGroup = groupService.findById(groupId);
+        Optional<Group> optGroup = groupService.findByCode(groupCode);
         Optional<Account> optAcc = accountService.findById(createBy);
         if (optGroup.isPresent() && optAcc.isPresent()) {
             Membership member = dtoToEntity(dto); // CANT PASS Group in, need to set
@@ -59,10 +59,10 @@ public class MembershipController {
         }
     }
 
-    @PostMapping("/{groupId}")
-    public ResponseEntity createInGroup (@PathVariable Integer groupId, @RequestBody MembershipDTO dto) {
+    @PostMapping("/{groupCode}")
+    public ResponseEntity createInGroup (@PathVariable String groupCode, @RequestBody MembershipDTO dto) {
         // always new
-        Optional<Group> optional = groupService.findById(groupId);
+        Optional<Group> optional = groupService.findByCode(groupCode);
         if (optional.isPresent()) {
             Membership member = dtoToEntity(dto); // CANT PASS Group in, need to set
             member.setGroup(optional.get());
