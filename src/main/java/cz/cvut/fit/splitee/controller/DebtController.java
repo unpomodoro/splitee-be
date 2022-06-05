@@ -21,6 +21,7 @@ public class DebtController {
     @Autowired
     private MembershipService membershipService;
 
+    // Parameter is not Debt because of the owes/getsBack sides complication
     public static DebtDTO entityToDto(Membership owes, Membership getsBack, BigDecimal amount) {
         return new DebtDTO(MembershipController.entityToDto(owes), MembershipController.entityToDto(getsBack), amount);
     }
@@ -71,6 +72,19 @@ public class DebtController {
                 BigDecimal newAmount = debt.getAmount().subtract(amountModif);
                 debt.setAmount(newAmount);
             }
+            debtService.createOrUpdate(debt);
+            DebtDTO newDto = entityToDto(debt.getOwes(), debt.getGetsBack(), debt.getAmount());
+            return ResponseEntity.ok(newDto);
+        }
+        return ResponseEntity.badRequest().body("This debt does not exist.");
+    }
+
+    @PutMapping("/{owes}/{getsBack}/settleup")
+    public ResponseEntity update(@PathVariable Integer owes, @PathVariable Integer getsBack) {
+        Optional<Debt> optional = debtService.findById(owes, getsBack);
+        if (optional.isPresent()) {
+            Debt debt = optional.get();
+            debt.setAmount(BigDecimal.ZERO);
             debtService.createOrUpdate(debt);
             DebtDTO newDto = entityToDto(debt.getOwes(), debt.getGetsBack(), debt.getAmount());
             return ResponseEntity.ok(newDto);
