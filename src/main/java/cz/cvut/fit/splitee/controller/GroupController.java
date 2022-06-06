@@ -118,7 +118,7 @@ public class GroupController {
     // addMember() --> In MembershipController
     // editMember() -> if(hasAccount()) can't edit | else ok --> In MembershipController
     // deleteMember() --> In MembershipController
-    @GetMapping("/{id}/bills")
+    @GetMapping("/{code}/bills")
     public Collection<BillDTO> listAllBills(@PathVariable String code) {
         Collection<Bill> entityList = groupService.findAllBillsByCode(code);
         Collection<BillDTO> dtoList = new ArrayList<>();
