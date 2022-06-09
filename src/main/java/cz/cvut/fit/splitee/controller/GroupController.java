@@ -6,7 +6,6 @@ import cz.cvut.fit.splitee.dto.MembershipDTO;
 import cz.cvut.fit.splitee.entity.Bill;
 import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.entity.Membership;
-import cz.cvut.fit.splitee.helper.TYPE;
 import cz.cvut.fit.splitee.service.AccountService;
 import cz.cvut.fit.splitee.service.BillService;
 import cz.cvut.fit.splitee.service.GroupService;
@@ -128,7 +127,7 @@ public class GroupController {
         for (Bill bill : entityList) {
             // the type is not important here
             MembershipDTO payer = MembershipController.entityToDto(billService.findPayerById(bill.getId().intValue()));
-            BillDTO dto = BillController.entityToDto(bill, payer, TYPE.EQUAL);
+            BillDTO dto = BillController.entityToDto(bill, payer);
             dtoList.add(dto);
         }
         return dtoList;

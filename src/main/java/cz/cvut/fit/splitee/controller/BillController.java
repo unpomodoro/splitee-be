@@ -6,7 +6,6 @@ import cz.cvut.fit.splitee.dto.SplitDTO;
 import cz.cvut.fit.splitee.entity.Bill;
 import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.entity.Split;
-import cz.cvut.fit.splitee.helper.TYPE;
 import cz.cvut.fit.splitee.service.BillService;
 import cz.cvut.fit.splitee.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +30,8 @@ public class BillController {
     static Bill dtoToEntity(BillDTO b, Group group) {
         return new Bill(b.getDescription(), b.getAmount(), b.getDate(), b.getNotes(), group);
     }
-    static BillDTO entityToDto(Bill b, MembershipDTO member, TYPE type) {
-        return new BillDTO(b.getDescription(), b.getAmount(), member, b.getDate(), b.getNotes(), type);
+    static BillDTO entityToDto(Bill b, MembershipDTO member) {
+        return new BillDTO(b.getId(), b.getDescription(), b.getAmount(), member, b.getDate(), b.getNotes());
     }
 
     @PostMapping("/{groupCode}")
@@ -45,8 +44,8 @@ public class BillController {
             dto.setDate(date);
 
             Bill bill = dtoToEntity(dto, optional.get());
-            billService.createOrUpdate(bill);
-            return ResponseEntity.created(null).body(dto);
+            BillDTO newDto = entityToDto(billService.createOrUpdate(bill), null);
+            return ResponseEntity.created(null).body(newDto);
         }
         else {
             return ResponseEntity.badRequest().body("This group does not exist");
@@ -58,10 +57,9 @@ public class BillController {
         Optional<Bill> optional = billService.findById(id);
         if (optional.isPresent()) {
             Bill bill = optional.get();
-            // the split set is never empty because a bill must have a participant to be created
-            Split split = bill.getSplits().iterator().next();
+
             MembershipDTO payer = MembershipController.entityToDto(billService.findPayerById(id));
-            BillDTO dto = entityToDto(bill, payer, split.getType());
+            BillDTO dto = entityToDto(bill, payer);
             return ResponseEntity.ok(dto);
         }
         else {
@@ -79,10 +77,9 @@ public class BillController {
             bill.setAmount(dto.getAmount());
             bill.setDate(dto.getDate());
             bill.setNotes(dto.getNotes());
-            // the split set is never empty because a bill must have a participant to be created
-            Split split = bill.getSplits().iterator().next();
+
             MembershipDTO payer = MembershipController.entityToDto(billService.findPayerById(id));
-            BillDTO dtoNew = entityToDto(billService.createOrUpdate(bill), payer, split.getType());
+            BillDTO dtoNew = entityToDto(billService.createOrUpdate(bill), payer);
             return ResponseEntity.ok(dtoNew);
         }
         return ResponseEntity.badRequest().body("This membership does not exist.");
