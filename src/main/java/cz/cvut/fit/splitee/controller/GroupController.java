@@ -6,7 +6,9 @@ import cz.cvut.fit.splitee.dto.MembershipDTO;
 import cz.cvut.fit.splitee.entity.Bill;
 import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.entity.Membership;
+import cz.cvut.fit.splitee.helper.TYPE;
 import cz.cvut.fit.splitee.service.AccountService;
+import cz.cvut.fit.splitee.service.BillService;
 import cz.cvut.fit.splitee.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,8 @@ public class GroupController {
     private GroupService groupService;
     @Autowired
     private AccountService accountService;
-
+    @Autowired
+    private BillService billService;
     final Integer CODELEN = 7;
     static Group dtoToEntity(GroupDTO g) {
         return new Group(g.getCode(), g.getName(), g.getCurrency(), g.getPhoto(), g.getDescription());
@@ -123,7 +126,9 @@ public class GroupController {
         Collection<Bill> entityList = groupService.findAllBillsByCode(code);
         Collection<BillDTO> dtoList = new ArrayList<>();
         for (Bill bill : entityList) {
-            BillDTO dto = BillController.entityToDto(bill);
+            // the type is not important here
+            MembershipDTO payer = MembershipController.entityToDto(billService.findPayerById(bill.getId().intValue()));
+            BillDTO dto = BillController.entityToDto(bill, payer, TYPE.EQUAL);
             dtoList.add(dto);
         }
         return dtoList;

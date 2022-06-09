@@ -8,6 +8,7 @@ import cz.cvut.fit.splitee.repository.MembershipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -44,5 +45,23 @@ public class DebtService {
         if(optOwes.isEmpty() || optGetsBack.isEmpty()) return;
         optOwes.get().getDebtsGetsBack().remove(optional.get());
         optGetsBack.get().getDebtsOwes().remove(optional.get());
+    }
+
+    public void updateDebt (Long owes, Long getsBack, BigDecimal amount) {
+        //get debt
+        Optional<Debt> optDebt = findById(owes.intValue(), getsBack.intValue());
+
+        if (optDebt.isPresent()) {
+            Debt debt = optDebt.get();
+            // the one who owes money is the 'owe' side in debt relationship
+            if (debt.getOwes().getId().equals(owes)) {
+                debt.setAmount(debt.getAmount().add(amount));
+            }
+            // the one who ows money is the 'getgBack' side in debt relationship
+            else {
+                debt.setAmount(debt.getAmount().subtract(amount));
+            }
+            debtRepository.save(debt);
+        }
     }
 }

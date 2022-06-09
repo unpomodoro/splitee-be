@@ -1,6 +1,7 @@
 package cz.cvut.fit.splitee.service;
 
 import cz.cvut.fit.splitee.entity.Bill;
+import cz.cvut.fit.splitee.entity.Membership;
 import cz.cvut.fit.splitee.entity.Split;
 import cz.cvut.fit.splitee.repository.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,4 +33,16 @@ public class BillService {
     }
 
     public Collection<Split> findAllSplitsById(Integer id) { return billRepository.findAllSplitsById(id.longValue()); }
+
+    public Membership findPayerById(Integer id) {
+        Collection<Split> splits = findAllSplitsById(id);
+        Membership payer = new Membership();
+        // payer has to be in the set
+        for (Split split : splits) {
+            if (split.isPayer()) {
+                payer = split.getMembership();
+            }
+        }
+        return payer;
+    }
 }

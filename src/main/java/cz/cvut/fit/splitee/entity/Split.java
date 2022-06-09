@@ -1,5 +1,6 @@
 package cz.cvut.fit.splitee.entity;
 
+import cz.cvut.fit.splitee.helper.TYPE;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,13 +14,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Split implements Serializable {
-    public enum TYPE {
-        EQUAL,
-        EXACT,
-        PERCENTAGE,
-        SHARE
-    }
-
     @EmbeddedId
     private SplitPK id;
 

@@ -1,6 +1,6 @@
 package cz.cvut.fit.splitee.dto;
 
-import cz.cvut.fit.splitee.entity.Split;
+import cz.cvut.fit.splitee.helper.TYPE;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +15,7 @@ public class SplitDTO {
     private Long billId;
     private Long memberId;
     private BigDecimal amount;
-    private Split.TYPE type;
+    private TYPE type;
     private BigDecimal value;
     private boolean isPayer;
     private BigDecimal amountPaid;
