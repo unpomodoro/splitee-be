@@ -2,7 +2,8 @@ package cz.cvut.fit.splitee.controller;
 
 import cz.cvut.fit.splitee.dto.DebtDTO;
 import cz.cvut.fit.splitee.entity.Debt;
-import cz.cvut.fit.splitee.entity.*;
+import cz.cvut.fit.splitee.entity.DebtPK;
+import cz.cvut.fit.splitee.entity.Membership;
 import cz.cvut.fit.splitee.service.DebtService;
 import cz.cvut.fit.splitee.service.MembershipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -26,20 +30,61 @@ public class DebtController {
         return new DebtDTO(MembershipController.entityToDto(owes), MembershipController.entityToDto(getsBack), amount);
     }
 
-    @PostMapping("/{owes}/{getsBack}")        // Debt is created at the same time as member
-    public ResponseEntity create (@PathVariable Integer owes, @PathVariable Integer getsBack, @RequestBody DebtDTO dto) {
-        Optional<Membership> optOwes = membershipService.findById(owes);
-        Optional<Membership> optGetsBack = membershipService.findById(getsBack);
-        if (optOwes.isPresent() && optGetsBack.isPresent()) {
-            Debt debt = new Debt(optOwes.get(), optGetsBack.get(), dto.getAmount());
-            debt.setId(new DebtPK(owes.longValue(), getsBack.longValue()));
-            DebtDTO newDto = entityToDto(optOwes.get(), optGetsBack.get() ,debtService.createOrUpdate(debt).getAmount());
-            return ResponseEntity.created(null).body(newDto);
+    // For mass create when creating a group
+    @PostMapping
+    public ResponseEntity createWithGroup (@RequestBody ArrayList<Integer> memberIds) {
+        int memberCnt = memberIds.size();
+
+        if (memberCnt <= 1) {
+            return ResponseEntity.ok("Not enough members to create debts");
         }
         else {
-            if (optOwes.isEmpty()) {
-                return ResponseEntity.badRequest().body("This member does not exist");
+            Collection<DebtDTO> debtsDTO = new ArrayList<>();
+
+            for ( int i = 0; i < memberCnt; i++) {
+                for (int j = i + 1; j < memberCnt; j++) {
+                    Integer owes = memberIds.get(i);
+                    Integer getsBack = memberIds.get(j);
+                    Optional<Membership> optOwes = membershipService.findById(owes);
+                    Optional<Membership> optGetsBack = membershipService.findById(getsBack);
+                    if (optOwes.isPresent() && optGetsBack.isPresent()) {
+                        Debt debt = new Debt(optOwes.get(), optGetsBack.get(), BigDecimal.ZERO);
+                        debt.setId(new DebtPK(owes.longValue(), getsBack.longValue()));
+                        debtService.createOrUpdate(debt);
+                        debtsDTO.add(entityToDto(optOwes.get(), optGetsBack.get(), BigDecimal.ZERO));
+                    }
+                    else {  // redundant but stay here just in case
+                        if (optOwes.isEmpty()) {
+                            return ResponseEntity.badRequest().body("This member does not exist");
+                        }
+                        return ResponseEntity.badRequest().body("This member does not exist");
+                    }
+                }
             }
+            return ResponseEntity.created(null).body(debtsDTO);
+        }
+    }
+
+    // For new member added to a group
+    @PostMapping("/{owes}")        // Debt is created at the same time as member
+    public ResponseEntity create (@PathVariable Integer owes) {
+        Optional<Membership> optOwes = membershipService.findById(owes);
+        Collection<DebtDTO> debtsDTO = new ArrayList<>();
+
+        if (optOwes.isPresent()) {
+            // get all member of group
+            Membership newMember = optOwes.get();
+            Set<Membership> groupMembers = newMember.getGroup().getMemberships();
+
+            for(Membership getsBack : groupMembers) {
+                Debt debt = new Debt(newMember, getsBack, BigDecimal.ZERO);
+                debt.setId(new DebtPK(newMember.getId(), getsBack.getId()));
+                debtService.createOrUpdate(debt);
+                debtsDTO.add(entityToDto(newMember, getsBack, BigDecimal.ZERO));
+            }
+            return ResponseEntity.created(null).body(debtsDTO);
+        }
+        else {
             return ResponseEntity.badRequest().body("This member does not exist");
         }
     }
