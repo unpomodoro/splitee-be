@@ -83,7 +83,7 @@ public class SplitController {
         return ResponseEntity.created(null).body(splitDTO);
     }
 
-    @PostMapping("/{billId}/")   // In FE, split are calculated - bill is created -> post req with array of splits in body
+    @PostMapping("/{billId}")   // In FE, split are calculated - bill is created -> post req with array of splits in body
     public ResponseEntity create (@PathVariable Integer billId, @RequestBody SplitRequest request) {
 
         Optional<Bill> optBill = billService.findById(billId);
