@@ -2,6 +2,7 @@ package cz.cvut.fit.splitee.controller;
 
 import cz.cvut.fit.splitee.helper.TYPE;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
