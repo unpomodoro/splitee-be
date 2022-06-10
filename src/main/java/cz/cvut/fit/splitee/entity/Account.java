@@ -38,6 +38,12 @@ public class Account {
         this.bankAccount = bankAccount;
     }
 
+    public Account(String email, String password, String name) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "Account{" +

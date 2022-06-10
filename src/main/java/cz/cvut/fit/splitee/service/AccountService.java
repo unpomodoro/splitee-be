@@ -5,6 +5,9 @@ import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.entity.Membership;
 import cz.cvut.fit.splitee.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +16,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 @Service
-public class AccountService {
+public class AccountService implements UserDetailsService {
     @Autowired
     private AccountRepository accountRepository;
 
@@ -36,5 +39,12 @@ public class AccountService {
         if(optional.isEmpty()) return;
         // member should not be removed because member still can exist without an account...?
         accountRepository.deleteById(id.longValue());
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Account user = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User Not Found with email: " + email));
+        return UserDetailsImpl.build(user);
     }
 }
