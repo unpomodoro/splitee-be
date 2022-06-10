@@ -7,6 +7,7 @@ import cz.cvut.fit.splitee.repository.DebtRepository;
 import cz.cvut.fit.splitee.repository.MembershipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -18,6 +19,7 @@ public class DebtService {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Transactional
     public Debt createOrUpdate(Debt debt) { return debtRepository.save(debt); }
 
     public Optional<Debt> findById(Integer id1, Integer id2) {
@@ -30,6 +32,7 @@ public class DebtService {
         return optional;
     }
 
+    @Transactional
     public void deleteById(Integer id1, Integer id2) {
         DebtPK id = new DebtPK(id1.longValue(), id2.longValue());
         Optional<Debt> optional = debtRepository.findById(id);
@@ -47,6 +50,7 @@ public class DebtService {
         optGetsBack.get().getDebtsOwes().remove(optional.get());
     }
 
+    @Transactional
     public void updateDebt (Long owes, Long getsBack, BigDecimal amount) {
         //get debt
         Optional<Debt> optDebt = findById(owes.intValue(), getsBack.intValue());
@@ -63,5 +67,11 @@ public class DebtService {
             }
             debtRepository.save(debt);
         }
+    }
+
+    @Transactional
+    public void reverseDebt (Long payer, Long participant, BigDecimal amount) {
+        // payer pays back participant
+        updateDebt(payer, participant, amount);
     }
 }

@@ -22,6 +22,7 @@ public class SplitService {
     @Autowired
     private MembershipRepository membershipRepository;
 
+    @Transactional
     public Split createOrUpdate(Split split) { return splitRepository.save(split); }
 
     public Optional<Split> findById(SplitPK id) { return splitRepository.findById(id); }
@@ -31,13 +32,17 @@ public class SplitService {
         Optional<Split> optSplit = splitRepository.findById(id);
         if(optSplit.isEmpty()) return;
 
-        Optional<Bill> optBill = billRepository.findById(id.getBillId());
-        Optional<Membership> optMember = membershipRepository.findById(id.getMembershipId());
+        delete(optSplit.get());
+    }
+
+    public void delete(Split split) {
+        Optional<Bill> optBill = billRepository.findById(split.getId().getBillId());
+        Optional<Membership> optMember = membershipRepository.findById(split.getId().getMembershipId());
 
         if(optBill.isEmpty() || optMember.isEmpty()) return;
-        optBill.get().getSplits().remove(optSplit.get());
-        optMember.get().getSplits().remove(optSplit.get());
+        optBill.get().getSplits().remove(split);
+        optMember.get().getSplits().remove(split);
 
-        splitRepository.deleteById(id); //redundant
+        splitRepository.deleteById(split.getId()); //redundant
     }
 }

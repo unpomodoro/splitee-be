@@ -1,10 +1,7 @@
 package cz.cvut.fit.splitee.controller;
 
 import cz.cvut.fit.splitee.dto.SplitDTO;
-import cz.cvut.fit.splitee.entity.Bill;
-import cz.cvut.fit.splitee.entity.Membership;
-import cz.cvut.fit.splitee.entity.Split;
-import cz.cvut.fit.splitee.entity.SplitPK;
+import cz.cvut.fit.splitee.entity.*;
 import cz.cvut.fit.splitee.service.BillService;
 import cz.cvut.fit.splitee.service.DebtService;
 import cz.cvut.fit.splitee.service.MembershipService;
@@ -36,56 +33,6 @@ public class SplitController {
                             s.getType(), s.getValue(), s.isPayer(), s.getAmountPaid());
     }
 
-    @PostMapping("/{billId}/")   // In FE, split are calculated - bill is created -> post req with array of splits in body
-    public ResponseEntity create (@PathVariable Integer billId, @RequestBody SplitRequest request) {
-
-        Optional<Bill> optBill = billService.findById(billId);
-        Optional<Membership> optPayer = membershipService.findById(request.payerId.intValue());
-
-        if (optBill.isPresent() && optPayer.isPresent()) {
-            // create all the splits here
-            Bill bill = optBill.get();
-            Membership payer = optPayer.get();
-            boolean payerIsParticipant = false;
-            Collection<SplitDTO> splitDTO = new ArrayList<>();
-
-            for (SplitObject splitObj : request.splits) {
-                Optional<Membership> optMember = membershipService.findById(splitObj.memberId.intValue());
-                if (optMember.isPresent()) {
-                    Membership participant = optMember.get();
-
-                    SplitPK id = new SplitPK(billId.longValue(), participant.getId());
-                    Split split = new Split(id, bill, participant, splitObj.amount, request.type, splitObj.value,
-                                            request.payerId.equals(splitObj.memberId),
-                                            request.payerId.equals(splitObj.memberId)
-                                                    ? request.amount
-                                                    : BigDecimal.ZERO); // single payer
-                    splitDTO.add(entityToDto(splitService.createOrUpdate(split)));
-
-
-                    // recalculate debt -> participant owes payer money
-                    if (!participant.equals(payer)) {
-                        debtService.updateDebt(participant.getId(), payer.getId(), splitObj.amount);
-                    }
-                    else {
-                        payerIsParticipant = true;
-                    }
-                }
-            }
-            // a 'blank' split relation to keep track of the payer
-            if(!payerIsParticipant) {
-                SplitPK id = new SplitPK(billId.longValue(), payer.getId());
-                Split split = new Split(id, bill, payer, BigDecimal.ZERO, request.type,
-                                        BigDecimal.ZERO, true, request.amount);
-                splitDTO.add(entityToDto(splitService.createOrUpdate(split)));
-
-            }
-            return ResponseEntity.created(null).body(splitDTO);
-        } else {
-            return ResponseEntity.badRequest().body("This bill does not exist");
-        }
-    }
-
     @GetMapping("/{billId}/{memberId}")
     public ResponseEntity findById (@PathVariable Integer billId, @PathVariable Integer memberId) {
         SplitPK id = new SplitPK(billId.longValue(), memberId.longValue());
@@ -99,24 +46,92 @@ public class SplitController {
         }
     }
 
-    @PutMapping("/{billId}/{memberId}")
-    public ResponseEntity update(@PathVariable Integer billId, @PathVariable Integer memberId, @RequestBody SplitDTO dto) {
-        SplitPK id = new SplitPK(billId.longValue(), memberId.longValue());
+    public ResponseEntity createSplits (Bill bill, Membership payer, SplitRequest request) {
+        boolean payerIsParticipant = false;
+        Collection<SplitDTO> splitDTO = new ArrayList<>();
 
-        Optional<Split> optional = splitService.findById(id);
-        if (optional.isPresent()) {
-            Split split = optional.get();
-            // DTO has all old and new fields
-            // bill & membership not changed
-            split.setAmount(dto.getAmount());
-            split.setType(dto.getType());
-            split.setValue(dto.getValue());
-            split.setPayer(dto.isPayer());
-            split.setAmountPaid(dto.getAmountPaid());
-            SplitDTO dtoNew = entityToDto(splitService.createOrUpdate(split));
-            return ResponseEntity.ok(dtoNew);
+        for (SplitObject splitObj : request.splits) {
+            Optional<Membership> optMember = membershipService.findById(splitObj.memberId.intValue());
+            if (optMember.isPresent()) {
+                Membership participant = optMember.get();
+
+                SplitPK id = new SplitPK(bill.getId(), participant.getId());
+                Split split = new Split(id, bill, participant, splitObj.amount, request.type, splitObj.value,
+                        request.payerId.equals(splitObj.memberId),
+                        request.payerId.equals(splitObj.memberId)
+                                ? request.amount
+                                : BigDecimal.ZERO); // single payer
+                splitDTO.add(entityToDto(splitService.createOrUpdate(split)));
+
+                // recalculate debt -> participant owes payer money
+                if (!participant.equals(payer)) {
+                    debtService.updateDebt(participant.getId(), payer.getId(), splitObj.amount);
+                }
+                else {
+                    payerIsParticipant = true;
+                }
+            }
         }
-        return ResponseEntity.badRequest().body("This split does not exist.");
+        // a 'blank' split relation to keep track of the payer
+        if(!payerIsParticipant) {
+            SplitPK id = new SplitPK(bill.getId(), payer.getId());
+            Split split = new Split(id, bill, payer, BigDecimal.ZERO, request.type,
+                    BigDecimal.ZERO, true, request.amount);
+            splitDTO.add(entityToDto(splitService.createOrUpdate(split)));
+
+        }
+        return ResponseEntity.created(null).body(splitDTO);
+    }
+
+    @PostMapping("/{billId}/")   // In FE, split are calculated - bill is created -> post req with array of splits in body
+    public ResponseEntity create (@PathVariable Integer billId, @RequestBody SplitRequest request) {
+
+        Optional<Bill> optBill = billService.findById(billId);
+        Optional<Membership> optPayer = membershipService.findById(request.payerId.intValue());
+
+        if (optBill.isPresent() && optPayer.isPresent()) {
+            // create all the splits here
+            Bill bill = optBill.get();
+            Membership payer = optPayer.get();
+            return createSplits(bill, payer, request);
+
+        } else {
+            return ResponseEntity.badRequest().body("This bill does not exist");
+        }
+    }
+
+    @PutMapping("/{billId}") // Only called when bill is edited - reverse all old splits and then create new :) --> split is never truly 'updated'
+    public ResponseEntity update(@PathVariable Integer billId, @PathVariable Integer memberId, @RequestBody SplitRequest request) {
+        // find all splits
+        Optional<Bill> optBill = billService.findById(billId);
+        Optional<Membership> optPayer = membershipService.findById(request.payerId.intValue());
+
+        if (optBill.isPresent() && optPayer.isPresent()) {
+            Collection<Split> splits = billService.findAllSplitsById(billId);
+            Membership payer = optPayer.get();
+
+            // reverse debt & delete split
+            for (Split split : splits) {
+                Optional<Membership> optParticipant = membershipService.findById(split.getMembership().getId().intValue());
+
+                if (optParticipant.isPresent()) {
+                    Membership participant = optParticipant.get();
+                    debtService.reverseDebt(payer.getId(), participant.getId(), split.getAmount());
+                }
+                else {
+                    return ResponseEntity.badRequest().body("This participant is not a member.");
+                }
+
+                splitService.delete(split);
+            }
+
+            // create new splits
+            Bill bill = optBill.get();
+            return createSplits(bill, payer, request);
+
+        } else {
+            return ResponseEntity.badRequest().body("This bill or member does not exist");
+        }
     }
 
     @DeleteMapping("/{billId}/{memberId}")
