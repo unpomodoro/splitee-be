@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Optional;
 
 @CrossOrigin
@@ -37,10 +36,13 @@ public class BillController {
     @PostMapping("/{groupCode}")
     public ResponseEntity create (@PathVariable String groupCode, @RequestBody BillDTO dto) {
         // always new
+
+        System.out.println(dto);
+
         Optional<Group> optional = groupService.findByCode(groupCode);
         if (optional.isPresent()) {
 
-            Timestamp date = new Timestamp(new Date().getTime());
+            Timestamp date = Timestamp.valueOf(dto.getDate().toString());
             dto.setDate(date);
 
             Bill bill = dtoToEntity(dto, optional.get());
@@ -75,7 +77,9 @@ public class BillController {
             // DTO has all old and new fields
             bill.setDescription(dto.getDescription());
             bill.setAmount(dto.getAmount());
-            bill.setDate(dto.getDate());
+            Timestamp date = Timestamp.valueOf(dto.getDate().toString());
+            dto.setDate(date);
+            bill.setDate(date);
             bill.setNotes(dto.getNotes());
 
             MembershipDTO payer = MembershipController.entityToDto(billService.findPayerById(id));
