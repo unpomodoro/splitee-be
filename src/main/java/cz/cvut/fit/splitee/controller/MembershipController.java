@@ -34,7 +34,8 @@ public class MembershipController {
 
     //TODO pass in the user's account id
     static MembershipDTO entityToDto(Membership m) {
-        return new MembershipDTO(m.getId(), m.getName(), m.getPhoto(), m.getBankAccount(), m.getDebt());
+        return new MembershipDTO(m.getId(), m.getName(), m.getPhoto(), m.getBankAccount(), m.getDebt(),
+                (m.getAccount() != null ? m.getAccount().getId() : null));
     }
 
     // This is used to add the first member when creating a group - it is the user themselves + connecting to the account
@@ -126,6 +127,10 @@ public class MembershipController {
 
             membership.setAccount(account);
             account.getMemberships().add(membership);
+
+            membership.setBankAccount(account.getBankAccount());
+            membership.setPhoto(membership.getPhoto());
+
             accountService.createOrUpdate(account);
             MembershipDTO dtoNew = entityToDto(membershipService.createOrUpdate(membership));
             return ResponseEntity.ok(dtoNew);

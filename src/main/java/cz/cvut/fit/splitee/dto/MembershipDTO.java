@@ -15,4 +15,5 @@ public class MembershipDTO {
     private String photo;
     private String bankAccount;
     private BigDecimal debt;
+    private Long accountId; // to determinate photo change possibility
 }
