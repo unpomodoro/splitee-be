@@ -101,7 +101,7 @@ public class SplitController {
     }
 
     @PutMapping("/{billId}") // Only called when bill is edited - reverse all old splits and then create new :) --> split is never truly 'updated'
-    public ResponseEntity update(@PathVariable Integer billId, @PathVariable Integer memberId, @RequestBody SplitRequest request) {
+    public ResponseEntity update(@PathVariable Integer billId, @RequestBody SplitRequest request) {
         // find all splits
         Optional<Bill> optBill = billService.findById(billId);
         Optional<Membership> optPayer = membershipService.findById(request.payerId.intValue());
