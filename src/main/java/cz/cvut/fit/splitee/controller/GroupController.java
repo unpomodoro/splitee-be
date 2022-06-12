@@ -13,9 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin
 @RestController
@@ -122,8 +120,9 @@ public class GroupController {
     // deleteMember() --> In MembershipController
     @GetMapping("/{code}/bills")
     public Collection<BillDTO> listAllBills(@PathVariable String code) {
-        Collection<Bill> entityList = groupService.findAllBillsByCode(code);
-        Collection<BillDTO> dtoList = new ArrayList<>();
+        ArrayList<Bill> entityList = new ArrayList<>(groupService.findAllBillsByCode(code));
+        Collections.sort(entityList, Collections.reverseOrder());
+        ArrayList<BillDTO> dtoList = new ArrayList<>();
         for (Bill bill : entityList) {
             // the type is not important here
             MembershipDTO payer = MembershipController.entityToDto(billService.findPayerById(bill.getId().intValue()));

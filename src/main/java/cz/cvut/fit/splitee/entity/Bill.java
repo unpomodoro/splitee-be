@@ -13,7 +13,7 @@ import java.util.Set;
 @Table(name = "bill")
 @Getter @Setter
 @NoArgsConstructor
-public class Bill {
+public class Bill implements Comparable<Bill> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "bill_id", nullable = false, updatable = false)
@@ -44,5 +44,10 @@ public class Bill {
         this.date = date;
         this.notes = notes;
         this.group = group;
+    }
+
+    @Override
+    public int compareTo(Bill b) {
+        return getDate().compareTo(b.getDate());
     }
 }
