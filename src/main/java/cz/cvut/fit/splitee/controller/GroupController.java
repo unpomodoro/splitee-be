@@ -6,13 +6,18 @@ import cz.cvut.fit.splitee.dto.MembershipDTO;
 import cz.cvut.fit.splitee.entity.Bill;
 import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.entity.Membership;
-import cz.cvut.fit.splitee.service.AccountService;
 import cz.cvut.fit.splitee.service.BillService;
 import cz.cvut.fit.splitee.service.GroupService;
+import cz.cvut.fit.splitee.service.MembershipService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.*;
 
 @CrossOrigin
@@ -22,7 +27,7 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
     @Autowired
-    private AccountService accountService;
+    private MembershipService membershipService;
     @Autowired
     private BillService billService;
     final Integer CODELEN = 7;
@@ -134,4 +139,60 @@ public class GroupController {
     // addBill() --> In BillController
     // editBill() --> In BillController
     // deleteBill() --> In BillController
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    final class MemberPaid implements Comparable<MemberPaid>, Serializable {
+        Long id;
+        String name;
+        BigDecimal amountPaid;
+
+        @Override
+        public int compareTo(MemberPaid m) {
+            return amountPaid.compareTo(m.amountPaid);
+        }
+    }
+
+    @GetMapping("/{code}/statistics")
+    public ArrayList<MemberPaid> statsOnWhoPaysMost (@PathVariable String code) {
+        // get all bills
+        Collection<Bill> bills = groupService.findAllBillsByCode(code);
+        Map<Long, BigDecimal> map =new HashMap<>();
+
+        for (Bill bill : bills) {
+            // get payer
+            Membership payer = billService.findPayerById(bill.getId().intValue());
+            // map<id, amount> <- amount is to be updated
+            if (map.containsKey(payer.getId())) {
+                map.put(payer.getId(), bill.getAmount().add(map.get(payer.getId())));
+            }
+            else {
+                map.put(payer.getId(), bill.getAmount());
+            }
+        }
+//        System.out.println("---------------------------------------------------------------");
+//        System.out.println(map);
+//        System.out.println("---------------------------------------------------------------");
+        // array MemberPaid sorted by amount
+        ArrayList<MemberPaid> data = new ArrayList<>();
+        for (Map.Entry<Long, BigDecimal> pair : map.entrySet()) {
+            MemberPaid m = new MemberPaid();
+            m.id = pair.getKey();
+            if(m.id == null) {  // remove later -> its only for testing database
+                m.id = 9999999L;
+                m.name = "null";
+                m.amountPaid = pair.getValue();
+            }
+            else {
+                Optional<Membership> opt = membershipService.findById(m.id.intValue());
+                opt.ifPresent(membership -> m.name = membership.getName());
+                m.amountPaid = pair.getValue();
+            }
+
+            data.add(m);
+        }
+        Collections.sort(data);
+        return data;
+    }
 }
