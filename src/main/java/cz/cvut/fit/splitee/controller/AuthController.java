@@ -22,7 +22,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
