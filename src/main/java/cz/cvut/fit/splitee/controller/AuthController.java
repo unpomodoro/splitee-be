@@ -3,10 +3,7 @@ package cz.cvut.fit.splitee.controller;
 import cz.cvut.fit.splitee.entity.Account;
 import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.repository.AccountRepository;
-import cz.cvut.fit.splitee.security.JwtResponse;
-import cz.cvut.fit.splitee.security.JwtUtils;
-import cz.cvut.fit.splitee.security.LoginRequest;
-import cz.cvut.fit.splitee.security.SignupRequest;
+import cz.cvut.fit.splitee.security.*;
 import cz.cvut.fit.splitee.service.AccountService;
 import cz.cvut.fit.splitee.service.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +19,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
 
-@CrossOrigin
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -67,12 +64,12 @@ public class AuthController {
         if (accountRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body("Error: Username is already taken!");
+                    .body(new MessageResponse("Error: Username is already taken!"));
         }
         if (accountRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body("Error: Email is already in use!");
+                    .body(new MessageResponse("Error: Email is already in use!"));
         }
         // Create new user's account
         Account account = new Account(signUpRequest.getEmail(),
@@ -80,6 +77,6 @@ public class AuthController {
                 signUpRequest.getName());
 
         accountRepository.save(account);
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 }
