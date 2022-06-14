@@ -7,6 +7,7 @@ import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import java.util.Optional;
 public class AccountController {
     @Autowired
     private AccountService accountService;
+    @Autowired
+    PasswordEncoder encoder;
 
     static AccountDTO entityToDto(Account acc) {
         return new AccountDTO(acc.getEmail(), acc.getPassword(), acc.getName(), acc.getPhoto(), acc.getBankAccount());
@@ -47,16 +50,16 @@ public class AccountController {
     }
 
     // update account
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity update(@PathVariable("id") Integer id, @RequestBody AccountDTO dto) {
         Optional<Account> optional = accountService.findById(id);
         if(optional.isPresent()) {
             Account acc = optional.get();
             // NOTE: email unchangeable ?
-            acc.setPassword(dto.getPassword());
-            acc.setName(dto.getName());
-            acc.setPhoto(dto.getPhoto());
-            acc.setBankAccount(dto.getBankAccount());
+            if (dto.getPassword() != null) acc.setPassword(encoder.encode(dto.getPassword()));
+            if (dto.getName() != null) acc.setName(dto.getName());
+            if (dto.getPhoto() != null) acc.setPhoto(dto.getPhoto());
+            if (dto.getBankAccount() != null) acc.setBankAccount(dto.getBankAccount());
             AccountDTO newDto = entityToDto(accountService.createOrUpdate(acc));
             return ResponseEntity.ok(newDto);
         }
