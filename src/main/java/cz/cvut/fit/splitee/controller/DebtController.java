@@ -31,7 +31,7 @@ public class DebtController {
     }
 
     // For mass create when creating a group
-    @PostMapping("/{groupCode}")
+    @PostMapping
     public ResponseEntity createWithGroup (@RequestBody ArrayList<Integer> memberIds) {
         int memberCnt = memberIds.size();
 

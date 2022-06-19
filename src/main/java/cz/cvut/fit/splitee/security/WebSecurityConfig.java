@@ -53,6 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/groups/{code}").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/groups/{code}/bills").authenticated()
                 .antMatchers(HttpMethod.GET, "/api/groups/{code}/members/noacc").authenticated()
                 .antMatchers("/api/groups/{code}/**").access("@guard.isInGroup(authentication, #code)")
                 // ACOUNT
@@ -66,8 +67,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // SPLIT
                 .antMatchers("/api/splits/{bId}/**").access("@guard.isInGroupBill(authentication, #bId)")
                 // DEBT
-                .antMatchers(HttpMethod.POST,"/api/debts/{code}/**").access("@guard.isInGroup(authentication, #code)")
-                .antMatchers("/api/debts/{mId}/**").access("@guard.isInGroupMember(authentication, #bId)")
+                .antMatchers(HttpMethod.POST,"/api/debts").authenticated()
+                .antMatchers("/api/debts/{mId}/**").access("@guard.isInGroupMember(authentication, #mId)")
                 .anyRequest().authenticated();
         http.addFilterBefore((Filter) authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
