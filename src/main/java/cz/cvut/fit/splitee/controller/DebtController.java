@@ -77,6 +77,7 @@ public class DebtController {
             Set<Membership> groupMembers = newMember.getGroup().getMemberships();
 
             for(Membership getsBack : groupMembers) {
+                if (getsBack.getId().equals(owes.longValue())) continue;
                 Debt debt = new Debt(newMember, getsBack, BigDecimal.ZERO);
                 debt.setId(new DebtPK(newMember.getId(), getsBack.getId()));
                 debtService.createOrUpdate(debt);
