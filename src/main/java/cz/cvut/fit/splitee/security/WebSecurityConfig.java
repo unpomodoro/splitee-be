@@ -4,6 +4,7 @@ import cz.cvut.fit.splitee.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -51,7 +52,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint((AuthenticationEntryPoint) unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-                .antMatchers("/api/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/groups/{code}").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/groups/{code}/members/noacc").authenticated()
+                .antMatchers("/api/groups/{code}/**").access("@guard.isInGroup(authentication, #code)")
+                // ACOUNT
+                .antMatchers("/api/account/{id}/**").access("@guard.isUser(authentication, #id)")
+                // MEMBERSHIP
+                .antMatchers(HttpMethod.POST,"/api/memberships/{code}/**").access("@guard.isInGroup(authentication, #code)")
+                .antMatchers("/api/memberships/{mId}/**").access("@guard.isInGroupMember(authentication, #mId)")
+                // BILL
+                .antMatchers(HttpMethod.POST,"/api/bills/{code}/**").access("@guard.isInGroup(authentication, #code)")
+                .antMatchers("/api/bills/{bId}/**").access("@guard.isInGroupBill(authentication, #bId)")
+                // SPLIT
+                .antMatchers("/api/splits/{bId}/**").access("@guard.isInGroupBill(authentication, #bId)")
+                // DEBT
+                .antMatchers(HttpMethod.POST,"/api/debts/{code}/**").access("@guard.isInGroup(authentication, #code)")
+                .antMatchers("/api/debts/{mId}/**").access("@guard.isInGroupMember(authentication, #bId)")
                 .anyRequest().authenticated();
         http.addFilterBefore((Filter) authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }

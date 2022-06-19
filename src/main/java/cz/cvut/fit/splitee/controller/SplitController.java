@@ -1,6 +1,6 @@
 package cz.cvut.fit.splitee.controller;
 
-import cz.cvut.fit.splitee.dto.SplitDTO;
+import cz.cvut.fit.splitee.controller.dto.SplitDTO;
 import cz.cvut.fit.splitee.entity.*;
 import cz.cvut.fit.splitee.service.BillService;
 import cz.cvut.fit.splitee.service.DebtService;

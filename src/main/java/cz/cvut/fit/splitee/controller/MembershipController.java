@@ -1,7 +1,7 @@
 package cz.cvut.fit.splitee.controller;
 
-import cz.cvut.fit.splitee.dto.DebtDTO;
-import cz.cvut.fit.splitee.dto.MembershipDTO;
+import cz.cvut.fit.splitee.controller.dto.DebtDTO;
+import cz.cvut.fit.splitee.controller.dto.MembershipDTO;
 import cz.cvut.fit.splitee.entity.Account;
 import cz.cvut.fit.splitee.entity.Debt;
 import cz.cvut.fit.splitee.entity.Group;

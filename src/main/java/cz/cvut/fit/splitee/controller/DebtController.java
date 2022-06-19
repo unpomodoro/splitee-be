@@ -1,6 +1,6 @@
 package cz.cvut.fit.splitee.controller;
 
-import cz.cvut.fit.splitee.dto.DebtDTO;
+import cz.cvut.fit.splitee.controller.dto.DebtDTO;
 import cz.cvut.fit.splitee.entity.Debt;
 import cz.cvut.fit.splitee.entity.DebtPK;
 import cz.cvut.fit.splitee.entity.Membership;
@@ -31,7 +31,7 @@ public class DebtController {
     }
 
     // For mass create when creating a group
-    @PostMapping
+    @PostMapping("/{groupCode}")
     public ResponseEntity createWithGroup (@RequestBody ArrayList<Integer> memberIds) {
         int memberCnt = memberIds.size();
 

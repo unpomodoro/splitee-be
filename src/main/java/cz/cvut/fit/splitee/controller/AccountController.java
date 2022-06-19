@@ -1,7 +1,7 @@
 package cz.cvut.fit.splitee.controller;
 
-import cz.cvut.fit.splitee.dto.AccountDTO;
-import cz.cvut.fit.splitee.dto.GroupDTO;
+import cz.cvut.fit.splitee.controller.dto.AccountDTO;
+import cz.cvut.fit.splitee.controller.dto.GroupDTO;
 import cz.cvut.fit.splitee.entity.Account;
 import cz.cvut.fit.splitee.entity.Group;
 import cz.cvut.fit.splitee.service.AccountService;
@@ -30,8 +30,6 @@ public class AccountController {
         return new Account(dto.getEmail(), dto.getPassword(), dto.getName(), dto.getPhoto(), dto.getBankAccount());
     }
 
-    // here is Account in the parameter because we dont have password in DTO
-    //TODO make this return responseEntity
     @PostMapping
     public Account register(@RequestBody AccountDTO dto) {
         Account account = dtoToEntity(dto);

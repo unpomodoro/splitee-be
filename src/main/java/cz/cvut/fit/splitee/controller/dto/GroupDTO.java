@@ -1,4 +1,4 @@
-package cz.cvut.fit.splitee.dto;
+package cz.cvut.fit.splitee.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
